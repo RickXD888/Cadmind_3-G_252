@@ -67,7 +67,7 @@ void Juego::run(sf::RenderWindow& window) {
 
 
     // CARGAR IMÁGENES
-    if (!texturaFondo.loadFromFile("assets/imagenes/backgrounds/Space Background_1920x1080.png")) {
+    if (!texturaFondo.loadFromFile("assets/imagenes/backgrounds/space-1.1.png")) {
         if (!texturaFondo.loadFromFile("assets/imagenes/menu/space-1.png")) {
              std::cout << "ERROR: Sin fondo." << std::endl;
         }
