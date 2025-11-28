@@ -6,7 +6,7 @@ Menu::Menu(float width, float height) {
     // 1. CONFIGURACIÓN DEL FONDO (Pixel Art)
     // ---------------------------------------------------------
     // Carga la imagen. Asegúrate de que exista "assets/fondo_pixel.png"
-    if (!textureFondo.loadFromFile("assets/imagenes/space-2.png")) {
+    if (!textureFondo.loadFromFile("assets/imagenes/menu/space-2.png")) {
         std::cout << "Error: No se pudo cargar assets/fondo_pixel.png" << std::endl;
         // Si falla, no crashea, solo se verá negro
     }
@@ -24,15 +24,15 @@ Menu::Menu(float width, float height) {
     // ---------------------------------------------------------
     // 2. CONFIGURACIÓN DE TEXTOS (Centrados Perfectamente)
     // ---------------------------------------------------------
-    if (!font.loadFromFile("assets/arial.ttf")) {
+    if (!font.loadFromFile("assets/tipografia/MTCORSVA.ttf")) {
         std::cout << "Error: No se pudo cargar assets/arial.ttf" << std::endl;
     }
 
     // --- TITULO (CARDMIND) ---
     title.setFont(font);
     title.setString("CARDMIND");
-    title.setCharacterSize(60); // Tamaño grande
-    title.setFillColor(sf::Color::Blue);
+    title.setCharacterSize(50); // Tamaño grande
+    title.setFillColor(sf::Color::White);
     
     // Centrado Matemático:
     // 1. Obtenemos el rectángulo que envuelve al texto
