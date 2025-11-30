@@ -1,6 +1,7 @@
 #include "Menu.hpp"
 #include <iostream> // Para mensajes de error en consola
 #include <algorithm>
+#include <cctype>
 
 Menu::Menu(float width, float height) {
     // ---------------------------------------------------------
@@ -65,7 +66,7 @@ Menu::Menu(float width, float height) {
     vsText.setFont(font);
     vsText.setString("1 VS 1");
     vsText.setCharacterSize(36);
-    vsText.setFillColor(sf::Color::Cyan);
+    vsText.setFillColor(sf::Color::Yellow);
     sf::FloatRect vsRect = vsText.getLocalBounds();
     vsText.setOrigin(vsRect.left + vsRect.width / 2.0f, vsRect.top + vsRect.height / 2.0f);
     vsText.setPosition(width / 2.0f, 300);
@@ -77,12 +78,14 @@ Menu::Menu(float width, float height) {
     inputNameText1.setCharacterSize(28);
     inputNameText1.setFillColor(sf::Color::White);
     inputNameText1.setPosition(width/2.0f - 200, 240);
+    inputNameText1.setOrigin(0,0);
     inputNameText1.setString(playerName1);
 
     inputNameText2.setFont(font);
     inputNameText2.setCharacterSize(28);
     inputNameText2.setFillColor(sf::Color::White);
     inputNameText2.setPosition(width/2.0f - 200, 300);
+    inputNameText2.setOrigin(0,0);
     inputNameText2.setString(playerName2);
 
     startButtonText.setFont(font);
@@ -92,6 +95,33 @@ Menu::Menu(float width, float height) {
     sf::FloatRect stb = startButtonText.getLocalBounds();
     startButtonText.setOrigin(stb.left + stb.width/2.0f, stb.top + stb.height/2.0f);
     startButtonText.setPosition(width/2.0f, 380);
+
+    // Input boxes and labels
+    inputBox1.setSize(sf::Vector2f(420.0f, 36.0f));
+    inputBox1.setFillColor(sf::Color(0,0,0,80));
+    inputBox1.setOutlineThickness(2);
+    inputBox1.setOutlineColor(sf::Color::White);
+    inputBox1.setPosition(width/2.0f - 200, 236);
+
+    inputBox2.setSize(sf::Vector2f(420.0f, 36.0f));
+    inputBox2.setFillColor(sf::Color(0,0,0,80));
+    inputBox2.setOutlineThickness(2);
+    inputBox2.setOutlineColor(sf::Color::White);
+    inputBox2.setPosition(width/2.0f - 200, 296);
+
+    labelPlayer1.setFont(font);
+    labelPlayer1.setCharacterSize(24);
+    labelPlayer1.setFillColor(sf::Color::Yellow);
+    labelPlayer1.setString("Jugador 1:");
+    labelPlayer1.setPosition(width/2.0f - 340, 240);
+
+    labelPlayer2.setFont(font);
+    labelPlayer2.setCharacterSize(24);
+    labelPlayer2.setFillColor(sf::Color::Yellow);
+    labelPlayer2.setString("Jugador 2:");
+    labelPlayer2.setPosition(width/2.0f - 340, 300);
+
+    // no decorative box for start button (user requested)
 
 
     // --- BOTÓN SALIR ---
@@ -148,6 +178,9 @@ int Menu::run(sf::RenderWindow& window) {
                             playerName2 = "";
                             inputNameText1.setString(playerName1);
                             inputNameText2.setString(playerName2);
+                            activeInput = 0;
+                            caretClock.restart();
+                            caretVisible = true;
                             continue;
                         }
                     } else {
@@ -155,14 +188,24 @@ int Menu::run(sf::RenderWindow& window) {
                         if (startButtonText.getGlobalBounds().contains(x, y)) {
                             if (menuMusic.getStatus() == sf::Music::Playing) menuMusic.stop();
                             // copy input texts to playerName fields
-                            playerName1 = inputNameText1.getString();
-                            playerName2 = inputNameText2.getString();
+                                std::string t1 = inputNameText1.getString();
+                                std::string t2 = inputNameText2.getString();
+                                if (t1.empty()) t1 = "Jugador 1";
+                                if (t2.empty()) t2 = "Jugador 2";
+                                playerName1 = t1;
+                                playerName2 = t2;
                             return 1; // 1v1 comenzar con nombres
                         }
+                        // Detectar clicks en cada campo para dar foco
+                            sf::FloatRect r1 = inputBox1.getGlobalBounds();
+                            sf::FloatRect r2 = inputBox2.getGlobalBounds();
+                        if (r1.contains(x,y)) {
+                            activeInput = 0; caretClock.restart(); caretVisible = true; continue;
+                        } else if (r2.contains(x,y)) {
+                            activeInput = 1; caretClock.restart(); caretVisible = true; continue;
+                        }
                         // Si clic fuera del área de inputs, cerrar inputs
-                        sf::FloatRect r1(inputNameText1.getPosition().x, inputNameText1.getPosition().y, 400, 40);
-                        sf::FloatRect r2(inputNameText2.getPosition().x, inputNameText2.getPosition().y, 400, 40);
-                        if (!r1.contains(x,y) && !r2.contains(x,y)) {
+                            if (!r1.contains((float)x,(float)y) && !r2.contains((float)x,(float)y)) {
                             showNameInputs = false;
                             showSubmenu = false;
                         }
@@ -195,25 +238,59 @@ int Menu::run(sf::RenderWindow& window) {
 
             // Manejo de entrada de texto para nombres cuando están visibles
             if (showNameInputs && e.type == sf::Event::TextEntered) {
-                if (e.text.unicode == 8) { // backspace: apply to second name if not empty else first
-                    std::string s2 = inputNameText2.getString();
-                    if (!s2.empty()) s2.pop_back();
-                    else {
+                // Backspace
+                if (e.text.unicode == 8) {
+                    if (activeInput == 0) {
                         std::string s1 = inputNameText1.getString();
                         if (!s1.empty()) s1.pop_back();
                         inputNameText1.setString(s1);
+                    } else {
+                        std::string s2 = inputNameText2.getString();
+                        if (!s2.empty()) s2.pop_back();
+                        inputNameText2.setString(s2);
                     }
-                    inputNameText2.setString(inputNameText2.getString());
                 } else if (e.text.unicode < 128) {
                     char ch = static_cast<char>(e.text.unicode);
-                    // If first name length < 12 append there, else append to second
-                    std::string s1 = inputNameText1.getString();
-                    std::string s2 = inputNameText2.getString();
-                    if (s1.size() < 12) s1.push_back(ch);
-                    else if (s2.size() < 12) s2.push_back(ch);
-                    inputNameText1.setString(s1);
-                    inputNameText2.setString(s2);
+                    if (!isprint((unsigned char)ch)) continue;
+                    if (activeInput == 0) {
+                        std::string s1 = inputNameText1.getString();
+                        if (s1.size() < 12) s1.push_back(ch);
+                        inputNameText1.setString(s1);
+                    } else {
+                        std::string s2 = inputNameText2.getString();
+                        if (s2.size() < 12) s2.push_back(ch);
+                        inputNameText2.setString(s2);
+                    }
                 }
+            }
+        }
+
+        // Actualizar parpadeo del caret
+        if (showNameInputs) {
+            float t = caretClock.getElapsedTime().asSeconds();
+            int phase = (int)(t / caretInterval);
+            caretVisible = (phase % 2) == 0;
+        } else {
+            caretVisible = false;
+        }
+
+        // Hover: cambiar color al pasar el ratón sobre opciones
+        sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        if (!showSubmenu) {
+            if (playText.getGlobalBounds().contains(mousePos)) playText.setFillColor(sf::Color::Blue); else playText.setFillColor(sf::Color::Yellow);
+            if (exitText.getGlobalBounds().contains(mousePos)) exitText.setFillColor(sf::Color::Magenta); else exitText.setFillColor(sf::Color::Red);
+        } else {
+            if (!showNameInputs) {
+                if (soloText.getGlobalBounds().contains(mousePos)) soloText.setFillColor(sf::Color::Blue); else soloText.setFillColor(sf::Color::Yellow);
+                // vsText: amarillo por defecto, azul al hover
+                if (vsText.getGlobalBounds().contains(mousePos)) vsText.setFillColor(sf::Color::Blue); else vsText.setFillColor(sf::Color::Yellow);
+            } else {
+                if (startButtonText.getGlobalBounds().contains(mousePos)) startButtonText.setFillColor(sf::Color::Blue); else startButtonText.setFillColor(sf::Color::Yellow);
+                // resaltar cajas si se pasa por encima
+                if (inputBox1.getGlobalBounds().contains(mousePos)) inputBox1.setOutlineColor(sf::Color::Cyan);
+                else if (activeInput != 0) inputBox1.setOutlineColor(sf::Color::White);
+                if (inputBox2.getGlobalBounds().contains(mousePos)) inputBox2.setOutlineColor(sf::Color::Cyan);
+                else if (activeInput != 1) inputBox2.setOutlineColor(sf::Color::White);
             }
         }
 
@@ -236,9 +313,45 @@ int Menu::run(sf::RenderWindow& window) {
                 window.draw(soloText);
                 window.draw(vsText);
             } else {
-                // Dibujar inputs de nombres y botón comenzar
+                // Dibujar etiquetas, cajas e inputs
+                window.draw(labelPlayer1);
+                window.draw(labelPlayer2);
+                // cajas
+                // change outline color if focused
+                if (activeInput == 0) inputBox1.setOutlineColor(sf::Color::Cyan); else inputBox1.setOutlineColor(sf::Color::White);
+                if (activeInput == 1) inputBox2.setOutlineColor(sf::Color::Cyan); else inputBox2.setOutlineColor(sf::Color::White);
+                window.draw(inputBox1);
+                window.draw(inputBox2);
+                // texto dentro de cajas (alineado con padding)
+                inputNameText1.setPosition(inputBox1.getPosition().x + 8, inputBox1.getPosition().y + 2);
+                inputNameText2.setPosition(inputBox2.getPosition().x + 8, inputBox2.getPosition().y + 2);
                 window.draw(inputNameText1);
                 window.draw(inputNameText2);
+
+                // Dibujar caret en el campo activo
+                if (caretVisible) {
+                    if (activeInput == 0) {
+                        sf::FloatRect b = inputNameText1.getGlobalBounds();
+                        float cx = b.left + b.width + 6;
+                        float cy = inputBox1.getPosition().y + 2;
+                        sf::RectangleShape caret(sf::Vector2f(3, inputNameText1.getCharacterSize()+4));
+                        caret.setPosition(cx, cy);
+                        caret.setFillColor(sf::Color::White);
+                        window.draw(caret);
+                    } else {
+                        sf::FloatRect b = inputNameText2.getGlobalBounds();
+                        float cx = b.left + b.width + 6;
+                        float cy = inputBox2.getPosition().y + 2;
+                        sf::RectangleShape caret(sf::Vector2f(3, inputNameText2.getCharacterSize()+4));
+                        caret.setPosition(cx, cy);
+                        caret.setFillColor(sf::Color::White);
+                        window.draw(caret);
+                    }
+                }
+
+                // Dibujar start button box + texto
+                // posicionar startButtonBox si es necesario
+                    // No se dibuja startButtonBox
                 window.draw(startButtonText);
             }
             window.draw(textoVol);

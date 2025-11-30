@@ -36,5 +36,18 @@ private:
     sf::Text inputNameText2;
     sf::Text startButtonText;
 
+    // Input focus / caret
+    int activeInput = 0; // 0 = primero, 1 = segundo
+    sf::Clock caretClock;
+    bool caretVisible = false;
+    float caretInterval = 0.5f; // segundos
+
+    // Visual boxes and labels for inputs
+    sf::RectangleShape inputBox1;
+    sf::RectangleShape inputBox2;
+    sf::Text labelPlayer1;
+    sf::Text labelPlayer2;
+    // decorative start button box removed
+
     
 };

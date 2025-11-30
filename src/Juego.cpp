@@ -138,7 +138,7 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
     if (texturasCartas.empty()) return;
 
     // Cargar textura de trofeo (opcional)
-    if (!trophyTexture.loadFromFile("assets/imagenes/trofeo.jpg")) {
+    if (!trophyTexture.loadFromFile("assets/imagenes/trofeo.png")) {
         // no fatal, solo advertencia
         std::cout << "Warning: no se pudo cargar assets/imagenes/trofeo.jpg" << std::endl;
     } else {
@@ -477,15 +477,15 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
 
         // UI 1v1: nombres, scores y últimas cartas emparejadas
         if (modoJuego == 1) {
-            // Nombres
+            // Nombres (usar nombres provistos desde el menú)
             textoJugador[0].setFont(font);
-            textoJugador[0].setString("Jugador 1");
+            textoJugador[0].setString(playerNames[0]);
             textoJugador[0].setCharacterSize(30);
             textoJugador[0].setFillColor((currentPlayer==0)?sf::Color::Yellow:sf::Color::White);
             textoJugador[0].setPosition(50, 10);
 
             textoJugador[1].setFont(font);
-            textoJugador[1].setString("Jugador 2");
+            textoJugador[1].setString(playerNames[1]);
             textoJugador[1].setCharacterSize(30);
             textoJugador[1].setFillColor((currentPlayer==1)?sf::Color::Yellow:sf::Color::White);
             textoJugador[1].setPosition(1920 - 200, 10);
@@ -548,9 +548,10 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
 
             if (modoJuego == 1) {
                 // Mostrar ganador, conteo de pares y trofeo centrados verticalmente
+                // Determinar ganador usando nombres reales
                 std::string victoriaStr;
-                if (score[0] > score[1]) victoriaStr = "GANA: Jugador 1";
-                else if (score[1] > score[0]) victoriaStr = "GANA: Jugador 2";
+                if (score[0] > score[1]) victoriaStr = std::string("GANA: ") + playerNames[0];
+                else if (score[1] > score[0]) victoriaStr = std::string("GANA: ") + playerNames[1];
                 else victoriaStr = "EMPATE";
 
                 // Título de victoria
@@ -562,7 +563,7 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
 
                 // Conteo de pares en una sola línea
                 std::stringstream ss;
-                ss << "Jugador 1: " << score[0] << " pares   -   " << "Jugador 2: " << score[1] << " pares";
+                ss << playerNames[0] << ": " << score[0] << " pares   -   " << playerNames[1] << ": " << score[1] << " pares";
                 textoTiempoFinal.setCharacterSize(40);
                 textoTiempoFinal.setString(ss.str());
                 sf::FloatRect fr = textoTiempoFinal.getLocalBounds();
@@ -581,6 +582,24 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
 
                 // Botón 'Jugar de nuevo' y 'Volver' debajo del trofeo con separación
                 botonReiniciar.setPosition(1920/2.0f, trophyY + 220.0f);
+                // Dibujar un fondo/halo alrededor del botón y efecto hover
+                sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+                sf::FloatRect localBounds = botonReiniciar.getLocalBounds();
+                float bw = localBounds.width;
+                float bh = localBounds.height;
+                sf::RectangleShape highlight(sf::Vector2f(bw + 24.0f, bh + 16.0f));
+                highlight.setOrigin((bw + 24.0f)/2.0f, (bh + 16.0f)/2.0f);
+                highlight.setPosition(botonReiniciar.getPosition());
+                highlight.setFillColor(sf::Color(0,0,0,150));
+                highlight.setOutlineThickness(2.0f);
+                if (botonReiniciar.getGlobalBounds().contains(mousePos)) {
+                    highlight.setOutlineColor(sf::Color::Blue);
+                    botonReiniciar.setFillColor(sf::Color::Blue);
+                } else {
+                    highlight.setOutlineColor(sf::Color::Yellow);
+                    botonReiniciar.setFillColor(sf::Color::Yellow);
+                }
+                window.draw(highlight);
                 window.draw(botonReiniciar);
                 botonMenu.setPosition(1920/2.0f, trophyY + 300.0f);
                 window.draw(botonMenu);
