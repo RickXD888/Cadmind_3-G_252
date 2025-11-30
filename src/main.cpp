@@ -13,19 +13,28 @@ int main() {
 
     // --- ESTE ES EL BUCLE INFINITO QUE FALTABA ---
     while (window.isOpen()) {
-        
         // 1. Mostramos el Menú y esperamos a que el usuario elija
         int opcion = menu.run(window);
 
-        if (opcion == 0) {
+        if (opcion == 0 || opcion == 1 || opcion == 3) {
             // --- JUGAR ---
-            // Si el usuario eligió jugar, lanzamos el juego
-            juego.run(window);
-            
+            // Sincronizar volumen del menú al juego
+            juego.setMasterVolume(menu.getVolume());
+
+            if (opcion == 3) {
+                // Mostrar pantalla de victoria de prueba
+                juego.showVictoryTest(window);
+            } else {
+                // Obtener nombres desde el menú si se ingresaron
+                std::string n1 = menu.getPlayerName1();
+                std::string n2 = menu.getPlayerName2();
+                juego.run(window, opcion, n1, n2);
+            }
+
             // --- AL VOLVER (Cuando juego.run termina) ---
             // Restauramos el tamaño de la ventana para el menú (800x600)
             window.setSize(sf::Vector2u(800, 600));
-            
+
             // Ajustamos la "cámara" (View) para que no se vea estirado
             sf::View view = window.getDefaultView();
             view.setSize(800, 600);
@@ -35,8 +44,8 @@ int main() {
             // Centramos la ventana pequeña en el monitor
             auto desktop = sf::VideoMode::getDesktopMode();
             window.setPosition(sf::Vector2i(desktop.width/2 - 400, desktop.height/2 - 300));
-            
-            // El bucle 'while' se repite y vuelve a mostrar el menú...
+            // Al volver del juego, sincronizar volumen del juego al menú
+            menu.setVolume(juego.getMasterVolume());
         }
         else {
             // --- SALIR ---

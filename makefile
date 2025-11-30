@@ -54,7 +54,7 @@ clean:
 .PHONY: all clean run-test run-cardmind runCardMind run00Ventana actualizar actualizar-force
 
 # Aliases (conveniencia): soportan la notación que quizás intentaste usar
-runCardMind: run-cardmind
+run: run-cardmind
 
 run00Ventana: run-test
 
