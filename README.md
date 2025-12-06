@@ -61,9 +61,12 @@ Depuración y ejecución
  - Mensajes de advertencia sobre assets faltantes aparecen en la consola; verifica que `assets/` contenga las rutas esperadas.
 
 Contacto / mantenimiento
- - Autor: (añadir nombre)
+ - Autor: (Ricardo OCiel Guzmán Delgado y Jersson Almir Gonzalez Gomez)
  - Para cambios: editar `src/`, compilar con `make` y probar con `make run`.
 
 Licencia
- - (añadir licencia si procede)
+ - Este proyecto se publica bajo la licencia MIT. Consulta el archivo `LICENSE` en la raíz del repositorio para el texto completo.
+
+Copyright
+ - © 2025 Ricardo OCiel Guzmán Delgado y Jersson Almir Gonzalez Gomez
 
