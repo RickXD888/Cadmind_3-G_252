@@ -1,55 +1,59 @@
+/**
+ * main.cpp
+ * Punto de entrada de la aplicación CardMind.
+ *
+ * Este fichero crea la ventana SFML, instancia las pantallas `Menu` y `Juego`
+ * y ejecuta el bucle principal que alterna entre mostrar el menú y ejecutar
+ * el juego según la elección del usuario.
+ */
+
 #include <SFML/Graphics.hpp>
 #include "Menu.hpp"
 #include "Juego.hpp"
 
 int main() {
-    // 1. Crear ventana inicial
+    // Crear ventana inicial para el menú (tamaño reducido por comodidad)
     sf::RenderWindow window(sf::VideoMode(800, 600), "CardMind");
     window.setFramerateLimit(60);
 
-    // Creamos las pantallas
+    // Instancias principales
     Menu menu(800, 600);
     Juego juego;
 
-    // --- ESTE ES EL BUCLE INFINITO QUE FALTABA ---
+    // Bucle principal: mostrar menú, ejecutar juego y regresar
     while (window.isOpen()) {
-        // 1. Mostramos el Menú y esperamos a que el usuario elija
+        // Mostrar el menú y esperar elección del usuario
         int opcion = menu.run(window);
 
         if (opcion == 0 || opcion == 1 || opcion == 3) {
-            // --- JUGAR ---
-            // Sincronizar volumen del menú al juego
+            // Sincronizar volumen desde el menú hacia el juego
             juego.setMasterVolume(menu.getVolume());
 
             if (opcion == 3) {
-                // Mostrar pantalla de victoria de prueba
+                // Opción de prueba: mostrar la pantalla de victoria
                 juego.showVictoryTest(window);
             } else {
-                // Obtener nombres desde el menú si se ingresaron
+                // Obtener nombres (si se introdujeron) y ejecutar el juego
                 std::string n1 = menu.getPlayerName1();
                 std::string n2 = menu.getPlayerName2();
                 juego.run(window, opcion, n1, n2);
             }
 
-            // --- AL VOLVER (Cuando juego.run termina) ---
-            // Restauramos el tamaño de la ventana para el menú (800x600)
+            // Al volver desde el juego, restaurar el tamaño y la vista para el menú
             window.setSize(sf::Vector2u(800, 600));
-
-            // Ajustamos la "cámara" (View) para que no se vea estirado
             sf::View view = window.getDefaultView();
             view.setSize(800, 600);
             view.setCenter(400, 300);
             window.setView(view);
 
-            // Centramos la ventana pequeña en el monitor
+            // Intentar centrar la ventana en el monitor
             auto desktop = sf::VideoMode::getDesktopMode();
             window.setPosition(sf::Vector2i(desktop.width/2 - 400, desktop.height/2 - 300));
-            // Al volver del juego, sincronizar volumen del juego al menú
+
+            // Sincronizar volumen hacia el menú al regresar
             menu.setVolume(juego.getMasterVolume());
-        }
-        else {
-            // --- SALIR ---
-            // Si en el menú eligieron salir, cerramos la ventana
+        } else {
+            // El usuario eligió salir -> cerrar la ventana y terminar
             window.close();
         }
     }

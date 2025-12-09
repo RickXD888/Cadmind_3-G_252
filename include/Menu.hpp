@@ -1,53 +1,70 @@
+/**
+ * Menu.hpp
+ * Declaración de la clase Menu que muestra la interfaz principal del juego,
+ * permite seleccionar el modo (Solitario / 1v1), introducir nombres para 1v1
+ * y controlar el volumen de la música.
+ */
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
 class Menu {
 public:
+    /**
+     * Constructor del menú.
+     * @param width  Ancho de la ventana esperada (para posicionamiento inicial)
+     * @param height Alto de la ventana esperada
+     */
     Menu(float width, float height);
-    // 0 = solitario, 1 = 1v1, 2 = salir
+
+    /**
+     * Ejecuta la pantalla del menú en la ventana indicada. Bloquea hasta que
+     * el usuario elija una opción.
+     * @return 0 = SOLITARIO, 1 = 1v1, 2 = SALIR (o cierre de ventana)
+     */
     int run(sf::RenderWindow& window);
 
     // Volumen del menú
     float getVolume() const;
     void setVolume(float v);
+
+    // Lectura de nombres introducidos por el usuario en el submenú 1v1
     std::string getPlayerName1() const { return playerName1; }
     std::string getPlayerName2() const { return playerName2; }
 
 private:
-    sf::Texture textureFondo; // La imagen en memoria
-    sf::Sprite spriteFondo;   // El objeto que dibuja la imagen
+    // Recursos gráficos del menú
+    sf::Texture textureFondo; // Imagen de fondo cargada
+    sf::Sprite spriteFondo;   // Sprite para dibujar el fondo
     sf::Font font;
     sf::Text title;
     sf::Text playText;
-    sf::Text soloText; // SOLITARIO (submenu)
-    sf::Text vsText;   // 1 VS 1 (submenu)
+    sf::Text soloText; // Texto "SOLITARIO" en el submenú
+    sf::Text vsText;   // Texto "1 VS 1" en el submenú
     sf::Text exitText;
+    sf::Text backText; // Botón para volver desde el submenú
     bool showSubmenu = false;
     sf::Music menuMusic;
-    sf::Text textoVol;
+    sf::Text textoVol; // Texto que muestra el volumen actual
     float menuVolume = 100.0f;
-    // Nombre de jugadores para 1v1 (inputs del submenu)
+
+    // Nombres de jugadores y elementos de input del submenú 1v1
     std::string playerName1;
     std::string playerName2;
-    // Mostrar inputs para nombres
     bool showNameInputs = false;
     sf::Text inputNameText1;
     sf::Text inputNameText2;
     sf::Text startButtonText;
 
-    // Input focus / caret
-    int activeInput = 0; // 0 = primero, 1 = segundo
-    sf::Clock caretClock;
+    // Estado de foco y caret para los inputs de texto
+    int activeInput = 0; // 0 = primer campo, 1 = segundo campo
+    sf::Clock caretClock; // controla parpadeo del caret
     bool caretVisible = false;
-    float caretInterval = 0.5f; // segundos
+    float caretInterval = 0.5f; // intervalo de parpadeo en segundos
 
-    // Visual boxes and labels for inputs
+    // Cajas visuales y etiquetas asociadas a los inputs
     sf::RectangleShape inputBox1;
     sf::RectangleShape inputBox2;
     sf::Text labelPlayer1;
     sf::Text labelPlayer2;
-    // decorative start button box removed
-
-    
 };

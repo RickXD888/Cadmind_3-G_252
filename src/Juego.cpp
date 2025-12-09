@@ -1,3 +1,13 @@
+/**
+ * Juego.cpp
+ * Implementación de la lógica del juego de memoria (concentración).
+ *
+ * Este archivo contiene la inicialización de recursos (texturas, audio),
+ * la creación y posicionamiento del tablero de cartas, la lógica de selección
+ * y emparejado, y la pantalla de victoria. Está preparado para correr en una
+ * ventana 1920x1080 dedicada durante la ejecución del juego.
+ */
+
 #include "Juego.hpp"
 #include <iostream>
 #include <algorithm> // Para std::shuffle
@@ -6,6 +16,17 @@
 #include <iomanip>   // Para formatear string
 #include <sstream>   // Para stringstream
 
+/**
+ * run: Ejecuta el bucle principal del juego.
+ * - Ajusta la ventana a 1920x1080 para la experiencia de juego.
+ * - Carga recursos (fuente, texturas, sonidos, música).
+ * - Inicializa el tablero y entra en el bucle de eventos y renderizado.
+ *
+ * Parámetros:
+ * - window: ventana SFML donde se dibuja el juego
+ * - modo: 0 = solitario (12 cartas), 1 = 1v1 (24 cartas)
+ * - name1, name2: nombres opcionales para el modo 1v1
+ */
 void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, const std::string& name2) {
     // -------------------------------------------------
     // 1. CONFIGURACION VENTANA (1920x1080)
@@ -168,7 +189,8 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
     pairedSprites[0].clear();
     pairedSprites[1].clear();
 
-    // Dependiendo del modo, usamos 6 pares (12 cartas) o 12 pares (24 cartas)
+    // Inicializa el tablero según el modo.
+    // p1/p2 se pasan por si se quiere usar el nombre al inicializar (no obligatorio).
     auto initBoard = [&](const std::string& p1, const std::string& p2) {
         cartas.clear();
         seleccionadas.clear();
@@ -211,7 +233,8 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
     float currentTargetWidth = 0.0f;
     float currentTargetHeight = 0.0f;
 
-    // POSICIONAMIENTO: lambda para (re)posicionar las cartas segun modoJuego
+    // POSICIONAMIENTO: lambda para (re)posicionar y escalar las cartas
+    // según el número de columnas/filas esperado para el modo.
     auto positionBoard = [&]() {
         int cols = 4;
         int rows = 3;

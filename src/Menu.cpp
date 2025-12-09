@@ -1,8 +1,18 @@
+/**
+ * Menu.cpp
+ * Implementación de la pantalla de menú principal del juego.
+ *
+ * Contiene la lógica para dibujar el menú, gestionar el submenú de selección
+ * (Solitario / 1v1), la entrada de nombres para 1v1, la reproducción de la
+ * música del menú y el control de volumen.
+ */
+
 #include "Menu.hpp"
 #include <iostream> // Para mensajes de error en consola
 #include <algorithm>
 #include <cctype>
 
+// Constructor: inicializa textos, posiciones y recursos del menú
 Menu::Menu(float width, float height) {
     // ---------------------------------------------------------
     // 1. CONFIGURACIÓN DEL FONDO (Pixel Art)
@@ -71,6 +81,15 @@ Menu::Menu(float width, float height) {
     vsText.setOrigin(vsRect.left + vsRect.width / 2.0f, vsRect.top + vsRect.height / 2.0f);
     vsText.setPosition(width / 2.0f, 300);
 
+    // Botón para volver desde el submenú
+    backText.setFont(font);
+    backText.setString("VOLVER");
+    backText.setCharacterSize(30);
+    backText.setFillColor(sf::Color::Yellow);
+    sf::FloatRect backRect = backText.getLocalBounds();
+    backText.setOrigin(backRect.left + backRect.width/2.0f, backRect.top + backRect.height/2.0f);
+    backText.setPosition(width / 2.0f, 360);
+
     // Inputs de nombre (inicializados vacíos)
     playerName1 = "Jugador 1";
     playerName2 = "Jugador 2";
@@ -135,6 +154,10 @@ Menu::Menu(float width, float height) {
     exitText.setPosition(width / 2.0f, 350); // Altura baja (menos separado)
 }
 
+/**
+ * run: muestra el menú y procesa eventos hasta que el usuario toma una
+ * decisión. Retorna un código según la opción elegida.
+ */
 int Menu::run(sf::RenderWindow& window) {
     // Iniciar música del menú
     if (!menuMusic.openFromFile("assets/music/calm-space-music-312291.mp3")) {
@@ -181,6 +204,11 @@ int Menu::run(sf::RenderWindow& window) {
                             activeInput = 0;
                             caretClock.restart();
                             caretVisible = true;
+                            continue;
+                        }
+                        // Volver al menú principal
+                        if (backText.getGlobalBounds().contains(x,y)) {
+                            showSubmenu = false;
                             continue;
                         }
                     } else {
@@ -284,6 +312,8 @@ int Menu::run(sf::RenderWindow& window) {
                 if (soloText.getGlobalBounds().contains(mousePos)) soloText.setFillColor(sf::Color::Blue); else soloText.setFillColor(sf::Color::Yellow);
                 // vsText: amarillo por defecto, azul al hover
                 if (vsText.getGlobalBounds().contains(mousePos)) vsText.setFillColor(sf::Color::Blue); else vsText.setFillColor(sf::Color::Yellow);
+                // backText: volver al menu
+                if (backText.getGlobalBounds().contains(mousePos)) backText.setFillColor(sf::Color::Blue); else backText.setFillColor(sf::Color::Yellow);
             } else {
                 if (startButtonText.getGlobalBounds().contains(mousePos)) startButtonText.setFillColor(sf::Color::Blue); else startButtonText.setFillColor(sf::Color::Yellow);
                 // resaltar cajas si se pasa por encima
@@ -312,6 +342,8 @@ int Menu::run(sf::RenderWindow& window) {
             if (!showNameInputs) {
                 window.draw(soloText);
                 window.draw(vsText);
+                // Dibujar botón Volver en submenú
+                window.draw(backText);
             } else {
                 // Dibujar etiquetas, cajas e inputs
                 window.draw(labelPlayer1);
