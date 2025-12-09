@@ -7,6 +7,7 @@ BIN_DIR := bin
 INC_DIR := include
 
 SFML := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lbox2d -lsfml-main
+EXTRA_LIBS := -lgdi32 -luser32
 
 CXX := g++
 CXXFLAGS := -I$(INC_DIR) -std=c++17 -O2
@@ -31,7 +32,9 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BIN_DIR)
 
 # Link CardMind from its objects
 $(CARD_EXE): $(CARD_OBJS)
-	$(CXX) $^ -o $@ $(SFML)
+	$(CXX) $^ -o $@ $(SFML) $(EXTRA_LIBS)
+
+# NOTE: resource compilation removed. Icons will be loaded at runtime from assets.
 
 # Run targets
 run-cardmind: $(CARD_EXE)

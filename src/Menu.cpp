@@ -40,6 +40,8 @@ Menu::Menu(float width, float height) {
         std::cout << "Error: No se pudo cargar assets/arial.ttf" << std::endl;
     }
 
+    // (no se carga logo en el menú; el icono de la aplicación se configura en main)
+
     // --- TITULO (CARDMIND) ---
     title.setFont(font);
     title.setString("CARDMIND");
@@ -151,7 +153,85 @@ Menu::Menu(float width, float height) {
 
     sf::FloatRect exitRect = exitText.getLocalBounds();
     exitText.setOrigin(exitRect.left + exitRect.width / 2.0f, exitRect.top + exitRect.height / 2.0f);
-    exitText.setPosition(width / 2.0f, 350); // Altura baja (menos separado)
+    exitText.setPosition(width / 2.0f, 380); // Altura baja (menos separado)
+
+    // --- BOTÓN MAZOS ---
+    decksText.setFont(font);
+    decksText.setString("MAZOS");
+    decksText.setCharacterSize(36);
+    decksText.setFillColor(sf::Color::Yellow);
+    sf::FloatRect decksRect = decksText.getLocalBounds();
+    decksText.setOrigin(decksRect.left + decksRect.width / 2.0f, decksRect.top + decksRect.height / 2.0f);
+    decksText.setPosition(width / 2.0f, 310);
+
+    // Cargar vistas previas de mazos (thumbnails)
+    bool loaded1 = false, loaded2 = false;
+    // intentar ruta principal (imagenes)
+    if (deck1Texture.loadFromFile("assets/imagenes/cards/baraja-1/1.png")) {
+        loaded1 = true;
+    } else if (deck1Texture.loadFromFile("assets/imagenes/cards/baraja-1/1.1.png")) {
+        loaded1 = true;
+    } else if (deck1Texture.loadFromFile("assets/cards/baraja-1/1.png")) {
+        loaded1 = true;
+    } else if (deck1Texture.loadFromFile("assets/cards/baraja-1/1.1.png")) {
+        loaded1 = true;
+    }
+    // Intentar varias convenciones de nombre: 1.1.png o 1.12.png
+    if (deck2Texture.loadFromFile("assets/imagenes/cards/baraja - 2/1.1.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/imagenes/cards/baraja - 2/1.12.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/imagenes/cards/baraja-2/1.1.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/imagenes/cards/baraja-2/1.12.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/cards/baraja - 2/1.1.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/cards/baraja - 2/1.12.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/cards/baraja-2/1.1.png")) {
+        loaded2 = true;
+    } else if (deck2Texture.loadFromFile("assets/cards/baraja-2/1.12.png")) {
+        loaded2 = true;
+    }
+
+    // Si alguna falla, crear placeholder simple
+    if (!loaded1) {
+        sf::Image img; img.create(160, 220, sf::Color(120,120,120));
+        deck1Texture.loadFromImage(img);
+    }
+    if (!loaded2) {
+        sf::Image img; img.create(160, 220, sf::Color(80,80,140));
+        deck2Texture.loadFromImage(img);
+    }
+
+    deck1Sprite.setTexture(deck1Texture);
+    deck2Sprite.setTexture(deck2Texture);
+    // Escalar thumbnails: reducir la miniatura del mazo 1 para que no sea tan grande
+    float thumbHDeck1 = 300.0f; // altura objetivo para mazo 1
+    if (deck1Texture.getSize().y > 0) {
+        float scale1 = thumbHDeck1 / deck1Texture.getSize().y;
+        deck1Sprite.setScale(scale1, scale1);
+    }
+    // Ajustar deck2 para que coincida en altura con deck1
+    if (deck2Texture.getSize().y > 0) {
+        float displayH1 = deck1Sprite.getGlobalBounds().height;
+        float scale2 = (displayH1 > 0) ? (displayH1 / deck2Texture.getSize().y) : 1.0f;
+        deck2Sprite.setScale(scale2, scale2);
+    }
+    // separar un poco más las miniaturas para evitar solapamiento
+    float spacingMenu = 120.0f;
+    deck1Sprite.setPosition(width/2.0f - (deck1Sprite.getGlobalBounds().width/2.0f) - spacingMenu, 200);
+    deck2Sprite.setPosition(width/2.0f + spacingMenu, 200);
+
+    // Botón volver dentro del selector de mazos
+    deckBackText.setFont(font);
+    deckBackText.setString("VOLVER");
+    deckBackText.setCharacterSize(28);
+    deckBackText.setFillColor(sf::Color::Yellow);
+    sf::FloatRect db = deckBackText.getLocalBounds();
+    deckBackText.setOrigin(db.left + db.width/2.0f, db.top + db.height/2.0f);
+    deckBackText.setPosition(width/2.0f, 520);
 }
 
 /**
@@ -185,6 +265,27 @@ int Menu::run(sf::RenderWindow& window) {
                 // Obtenemos coordenadas del mouse
                 auto x = sf::Mouse::getPosition(window).x;
                 auto y = sf::Mouse::getPosition(window).y;
+
+                // Selector de mazos
+                if (showDecksMenu) {
+                    // Click en deck1
+                    if (deck1Sprite.getGlobalBounds().contains((float)x,(float)y)) {
+                        selectedDeck = 1;
+                        showDecksMenu = false;
+                        continue;
+                    }
+                    // Click en deck2
+                    if (deck2Sprite.getGlobalBounds().contains((float)x,(float)y)) {
+                        selectedDeck = 2;
+                        showDecksMenu = false;
+                        continue;
+                    }
+                    // Volver
+                    if (deckBackText.getGlobalBounds().contains((float)x,(float)y)) {
+                        showDecksMenu = false;
+                        continue;
+                    }
+                }
 
                 // Si está abierto el submenú, detectar selección ahí
                 if (showSubmenu) {
@@ -242,6 +343,11 @@ int Menu::run(sf::RenderWindow& window) {
                     // Detectar clics en el menú principal
                     if (playText.getGlobalBounds().contains(x, y)) {
                         showSubmenu = true; // Abrir submenú
+                        continue;
+                    }
+
+                    if (decksText.getGlobalBounds().contains(x,y)) {
+                        showDecksMenu = true;
                         continue;
                     }
 
@@ -307,6 +413,7 @@ int Menu::run(sf::RenderWindow& window) {
         if (!showSubmenu) {
             if (playText.getGlobalBounds().contains(mousePos)) playText.setFillColor(sf::Color::Blue); else playText.setFillColor(sf::Color::Yellow);
             if (exitText.getGlobalBounds().contains(mousePos)) exitText.setFillColor(sf::Color::Magenta); else exitText.setFillColor(sf::Color::Red);
+            if (decksText.getGlobalBounds().contains(mousePos)) decksText.setFillColor(sf::Color::Blue); else decksText.setFillColor(sf::Color::Yellow);
         } else {
             if (!showNameInputs) {
                 if (soloText.getGlobalBounds().contains(mousePos)) soloText.setFillColor(sf::Color::Blue); else soloText.setFillColor(sf::Color::Yellow);
@@ -330,11 +437,14 @@ int Menu::run(sf::RenderWindow& window) {
         // 1. El fondo va primero para que quede atrás
         window.draw(spriteFondo);
 
+        // (no dibujamos logo en el menú)
+
         // 2. Los textos van encima
         window.draw(title);
         // Si no hay submenú, dibujar menú principal
         if (!showSubmenu) {
             window.draw(playText);
+            window.draw(decksText);
             window.draw(exitText);
             window.draw(textoVol);
         } else {
@@ -387,6 +497,42 @@ int Menu::run(sf::RenderWindow& window) {
                 window.draw(startButtonText);
             }
             window.draw(textoVol);
+        }
+
+        // Dibujar selector de mazos si está activo
+        if (showDecksMenu) {
+            // dim background
+            sf::RectangleShape overlay(sf::Vector2f(window.getView().getSize()));
+            overlay.setFillColor(sf::Color(0,0,0,180));
+            window.draw(overlay);
+
+            // Titular
+            sf::Text titleDecks("Seleccionar Mazo", font);
+            titleDecks.setCharacterSize(48); titleDecks.setFillColor(sf::Color::White);
+            sf::FloatRect trd = titleDecks.getLocalBounds(); titleDecks.setOrigin(trd.left + trd.width/2.0f, trd.top + trd.height/2.0f);
+            titleDecks.setPosition(window.getView().getSize().x/2.0f, 120);
+            window.draw(titleDecks);
+
+            // Draw thumbnails
+            // hover effect
+            if (deck1Sprite.getGlobalBounds().contains(mousePos)) {
+                // outline
+                sf::RectangleShape outline(sf::Vector2f(deck1Sprite.getGlobalBounds().width + 8, deck1Sprite.getGlobalBounds().height + 8));
+                outline.setOrigin(outline.getSize().x/2.0f, outline.getSize().y/2.0f);
+                outline.setPosition(deck1Sprite.getPosition().x + deck1Sprite.getGlobalBounds().width/2.0f, deck1Sprite.getPosition().y + deck1Sprite.getGlobalBounds().height/2.0f);
+                outline.setFillColor(sf::Color::Transparent); outline.setOutlineColor(sf::Color::Cyan); outline.setOutlineThickness(4);
+                window.draw(outline);
+            }
+            if (deck2Sprite.getGlobalBounds().contains(mousePos)) {
+                sf::RectangleShape outline(sf::Vector2f(deck2Sprite.getGlobalBounds().width + 8, deck2Sprite.getGlobalBounds().height + 8));
+                outline.setOrigin(outline.getSize().x/2.0f, outline.getSize().y/2.0f);
+                outline.setPosition(deck2Sprite.getPosition().x + deck2Sprite.getGlobalBounds().width/2.0f, deck2Sprite.getPosition().y + deck2Sprite.getGlobalBounds().height/2.0f);
+                outline.setFillColor(sf::Color::Transparent); outline.setOutlineColor(sf::Color::Cyan); outline.setOutlineThickness(4);
+                window.draw(outline);
+            }
+            window.draw(deck1Sprite);
+            window.draw(deck2Sprite);
+            window.draw(deckBackText);
         }
 
         window.display();

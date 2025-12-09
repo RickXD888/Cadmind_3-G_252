@@ -92,4 +92,8 @@ private:
     // Imagen del trofeo para la pantalla de victoria
     sf::Texture trophyTexture;
     sf::Sprite trophySprite;
+    // Selección de mazo (1 o 2)
+    int selectedDeck = 1;
+public:
+    void setSelectedDeck(int d) { if (d==1||d==2) selectedDeck = d; }
 };

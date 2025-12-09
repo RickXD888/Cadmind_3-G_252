@@ -98,7 +98,7 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
 
 
     // CARGAR IMÁGENES
-    if (!texturaFondo.loadFromFile("assets/imagenes/backgrounds/space-1.1.png")) {
+    if (!texturaFondo.loadFromFile("assets/imagenes/backgrounds/Space Background_1920x1080.png")) {
         if (!texturaFondo.loadFromFile("assets/imagenes/menu/space-1.png")) {
              std::cout << "ERROR: Sin fondo." << std::endl;
         }
@@ -108,7 +108,20 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
         spriteFondo.setScale(1920.0f/texturaFondo.getSize().x, 1080.0f/texturaFondo.getSize().y);
     }
 
-    if (!texturaReverso.loadFromFile("assets/imagenes/cards/baraja-1/back.png")) {
+    // Cargar reverso dependiendo del mazo seleccionado
+    bool loadedBack = false;
+    if (selectedDeck == 1) {
+        if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja-1/back.png")) loadedBack = true;
+        else if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja-1/back1.1.png")) loadedBack = true;
+    } else {
+        // baraja 2: hay varios nombres (bakc1.1.png con tipografía errónea en el repo, back.png, etc.)
+        if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja - 2/bakc1.1.png")) loadedBack = true;
+        else if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja - 2/back1.1.png")) loadedBack = true;
+        else if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja - 2/back.png")) loadedBack = true;
+        else if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja-2/back.png")) loadedBack = true;
+        else if (texturaReverso.loadFromFile("assets/imagenes/cards/baraja-2/bakc1.1.png")) loadedBack = true;
+    }
+    if (!loadedBack) {
         sf::Image img; img.create(140, 190, sf::Color::Magenta);
         texturaReverso.loadFromImage(img);
     }
@@ -146,12 +159,31 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
     }
 
     texturasCartas.clear();
-    // Cargamos un conjunto básico de texturas. Nombres esperados: 1.1.png .. 1.12.png
+    // Cargamos un conjunto básico de texturas según el mazo seleccionado.
+    // Para la baraja 2 los nombres son 1.1.png .. 1.12.png en carpeta "baraja - 2".
     for (int i = 1; i <= 12; i++) {
         sf::Texture t;
-        std::string ruta = "assets/imagenes/cards/baraja-1/" + std::to_string(i) + ".png";
-        if (t.loadFromFile(ruta)) {
-            t.setSmooth(true); 
+        bool loaded = false;
+        if (selectedDeck == 2) {
+            // intentar varios patrones para baraja 2 (con espacio en nombre de carpeta)
+            std::string r1 = "assets/imagenes/cards/baraja - 2/1." + std::to_string(i) + ".png";
+            std::string r2 = "assets/imagenes/cards/baraja-2/1." + std::to_string(i) + ".png";
+            std::string r3 = "assets/cards/baraja - 2/1." + std::to_string(i) + ".png";
+            if (t.loadFromFile(r1) || t.loadFromFile(r2) || t.loadFromFile(r3)) {
+                loaded = true;
+            }
+        } else {
+            // baraja 1 suele tener nombres 1.png o 1.1.png
+            std::string r1 = "assets/imagenes/cards/baraja-1/" + std::to_string(i) + ".png";
+            std::string r2 = "assets/imagenes/cards/baraja-1/1." + std::to_string(i) + ".png";
+            std::string r3 = "assets/cards/baraja-1/" + std::to_string(i) + ".png";
+            std::string r4 = "assets/cards/baraja-1/1." + std::to_string(i) + ".png";
+            if (t.loadFromFile(r1) || t.loadFromFile(r2) || t.loadFromFile(r3) || t.loadFromFile(r4)) {
+                loaded = true;
+            }
+        }
+        if (loaded) {
+            t.setSmooth(true);
             texturasCartas.push_back(t);
         }
     }
@@ -302,6 +334,21 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
     botonReiniciar.setOrigin(rr.left + rr.width/2.0f, rr.top + rr.height/2.0f);
     botonReiniciar.setPosition(1920/2.0f, 680);
 
+    // --- Selector de mazo en juego (toggle con tecla D) ---
+    bool showDeckSelectorInGame = false;
+    sf::Texture deckThumb1Tex, deckThumb2Tex;
+    sf::Sprite deckThumb1Spr, deckThumb2Spr;
+    // intentar cargar miniaturas sencillas
+    if (!deckThumb1Tex.loadFromFile("assets/imagenes/cards/baraja-1/1.png")) {
+        // fallback
+        deckThumb1Tex = texturasCartas.empty() ? sf::Texture() : texturasCartas[0];
+    }
+    if (!deckThumb2Tex.loadFromFile("assets/imagenes/cards/baraja - 2/1.1.png")) {
+        deckThumb2Tex = deckThumb1Tex;
+    }
+    deckThumb1Spr.setTexture(deckThumb1Tex);
+    deckThumb2Spr.setTexture(deckThumb2Tex);
+
     // -------------------------------------------------
     // 5. BUCLE DE JUEGO
     // -------------------------------------------------
@@ -343,8 +390,43 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
                 if (gameMusic.getStatus() == sf::Music::Playing) gameMusic.setVolume(masterVolume);
             }
 
+            // Tecla D para abrir selector de mazo en partida
+            if (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::D) {
+                showDeckSelectorInGame = !showDeckSelectorInGame;
+                // si abrimos, pausar música y mostrar overlays; si cerramos, continuar
+                if (showDeckSelectorInGame) {
+                    if (gameMusic.getStatus() == sf::Music::Playing) gameMusic.pause();
+                } else {
+                    if (gameMusic.getStatus() == sf::Music::Paused) gameMusic.play();
+                }
+            }
+
             if (e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+                // Si el selector de mazos en partida está activo, procesar clicks aquí primero
+                if (showDeckSelectorInGame) {
+                    if (deckThumb1Spr.getGlobalBounds().contains(mousePos)) {
+                        setSelectedDeck(1);
+                        initBoard(playerNames[0], playerNames[1]);
+                        positionBoard();
+                        showDeckSelectorInGame = false;
+                        if (gameMusic.getStatus() == sf::Music::Paused) gameMusic.play();
+                        continue;
+                    } else if (deckThumb2Spr.getGlobalBounds().contains(mousePos)) {
+                        setSelectedDeck(2);
+                        initBoard(playerNames[0], playerNames[1]);
+                        positionBoard();
+                        showDeckSelectorInGame = false;
+                        if (gameMusic.getStatus() == sf::Music::Paused) gameMusic.play();
+                        continue;
+                    } else {
+                        // clic fuera: cerrar selector
+                        showDeckSelectorInGame = false;
+                        if (gameMusic.getStatus() == sf::Music::Paused) gameMusic.play();
+                        continue;
+                    }
+                }
 
                 // --- SI EL JUEGO TERMINÓ: DETECTAR CLIC EN BOTONES ---
                 if (juegoTerminado) {
@@ -456,7 +538,7 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
         }
 
         // --- MANEJO DE ERROR (VOLVER A OCULTAR) ---
-        if (bloqueado && relojEspera.getElapsedTime().asSeconds() > 1.0f) {
+                if (bloqueado && relojEspera.getElapsedTime().asSeconds() > 1.0f) {
             for (int index : seleccionadas) {
                 cartas[index].revelada = false;
                 cartas[index].sprite.setTexture(texturaReverso, true);
@@ -637,6 +719,42 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
             }
         }
 
+        // Dibujar selector de mazos en partida si está activo
+        if (showDeckSelectorInGame) {
+            sf::RectangleShape overlay(sf::Vector2f(1920, 1080));
+            overlay.setFillColor(sf::Color(0,0,0,200));
+            window.draw(overlay);
+
+            // calcular escala para thumbs (hacer mazo 1 más pequeño)
+            float targetH1 = 300.0f; // reducir mazo 1
+            if (deckThumb1Tex.getSize().y > 0) {
+                float s1 = targetH1 / deckThumb1Tex.getSize().y;
+                deckThumb1Spr.setScale(s1, s1);
+            }
+            if (deckThumb2Tex.getSize().y > 0) {
+                float s2 = (deckThumb1Spr.getGlobalBounds().height > 0) ? (deckThumb1Spr.getGlobalBounds().height / deckThumb2Tex.getSize().y) : 2.0f;
+                deckThumb2Spr.setScale(s2, s2);
+            }
+            // positions
+            float centerX = 1920/2.0f;
+            float spacingInGame = 120.0f;
+            deckThumb1Spr.setPosition(centerX - deckThumb1Spr.getGlobalBounds().width - spacingInGame, 280);
+            deckThumb2Spr.setPosition(centerX + spacingInGame, 280);
+            // draw
+            window.draw(deckThumb1Spr);
+            window.draw(deckThumb2Spr);
+
+            // labels
+            sf::Text lbl1("Mazo 1", font); lbl1.setCharacterSize(32); lbl1.setFillColor(sf::Color::White);
+            sf::FloatRect l1b = lbl1.getLocalBounds(); lbl1.setOrigin(l1b.left + l1b.width/2.0f, l1b.top + l1b.height/2.0f);
+            lbl1.setPosition(deckThumb1Spr.getPosition().x + deckThumb1Spr.getGlobalBounds().width/2.0f, deckThumb1Spr.getPosition().y + deckThumb1Spr.getGlobalBounds().height + 30);
+            sf::Text lbl2("Mazo 2", font); lbl2.setCharacterSize(32); lbl2.setFillColor(sf::Color::White);
+            sf::FloatRect l2b = lbl2.getLocalBounds(); lbl2.setOrigin(l2b.left + l2b.width/2.0f, l2b.top + l2b.height/2.0f);
+            lbl2.setPosition(deckThumb2Spr.getPosition().x + deckThumb2Spr.getGlobalBounds().width/2.0f, deckThumb2Spr.getPosition().y + deckThumb2Spr.getGlobalBounds().height + 30);
+            window.draw(lbl1);
+            window.draw(lbl2);
+        }
+
         window.display();
     }
 }
@@ -702,6 +820,8 @@ void Juego::run(sf::RenderWindow& window, int modo, const std::string& name1, co
                     if (volver.getGlobalBounds().contains(mp)) return;
                 }
             }
+
+            
 
             window.clear();
             // background dim

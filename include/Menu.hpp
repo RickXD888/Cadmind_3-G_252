@@ -31,6 +31,8 @@ public:
     // Lectura de nombres introducidos por el usuario en el submenú 1v1
     std::string getPlayerName1() const { return playerName1; }
     std::string getPlayerName2() const { return playerName2; }
+    // Selección de mazo (1 = baraja-1, 2 = baraja-2)
+    int getSelectedDeck() const { return selectedDeck; }
 
 private:
     // Recursos gráficos del menú
@@ -44,6 +46,16 @@ private:
     sf::Text exitText;
     sf::Text backText; // Botón para volver desde el submenú
     bool showSubmenu = false;
+    // Maestros / Deck selection
+    sf::Text decksText; // Texto para abrir selector de mazos
+    bool showDecksMenu = false;
+    sf::Texture deck1Texture;
+    sf::Texture deck2Texture;
+    sf::Sprite deck1Sprite;
+    sf::Sprite deck2Sprite;
+    sf::Text deckBackText; // Botón volver dentro del selector de mazos
+    int selectedDeck = 1;
+    // (logo en el menú eliminado; la aplicación usa icono de ventana)
     sf::Music menuMusic;
     sf::Text textoVol; // Texto que muestra el volumen actual
     float menuVolume = 100.0f;
