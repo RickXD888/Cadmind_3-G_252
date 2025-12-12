@@ -107,6 +107,31 @@ Cadmind_3-G_252/
 - Encuentra todos los pares de cartas lo más rápido posible.
 - En 1 vs 1, gana quien tenga más pares al final.
 
+## 📜 Créditos y Licencias
+### 🛠️ Activos Utilizados
+Este proyecto utiliza el siguiente recurso gráfico liberado bajo el dominio público:
+
+* **Fantasy Card - Dark Cosmic** por **Cethiel**
+   * *Licencia:* CC0 (Dominio Público)
+   * *Fuente:* [OpenGameArt.org](https://opengameart.org/content/fantasy-card-dark-cosmic)
+
+---
+
+### 💡 Recursos Recomendados
+Los siguientes recursos **no se utilizan en este proyecto**, pero se incluyen aquí como recomendación para desarrolladores que busquen estilos alternativos o complementarios:
+
+* **Playing Cards** por **Lanea Zimmerman (Sharm)**
+   * *Descripción:* Un set clásico y muy completo de cartas de póker.
+   * *Licencia:* CC-BY 4.0 / CC-BY 3.0 (Requiere atribución si se integra en un proyecto).
+   * *Fuente:* [OpenGameArt.org](https://opengameart.org/content/playing-cards)
+
+* **Kenney Assets**
+   * *Descripción:* Colección masiva de activos de alta calidad (UI, Sprites, 3D, Audio).
+   * *Licencia:* CC0 (Dominio Público).
+   * *Sitio Oficial:* [kenney.nl](https://kenney.nl/)
+
+> Un agradecimiento especial a los autores mencionados por su contribución a la comunidad de desarrollo de juegos open source.
+
 ## 🔧 Notas de Implementación
 
 - **UI**: Utiliza SFML para textos (`sf::Text`), sprites (`sf::Sprite`) y audio (`sf::Music`, `sf::Sound`).
