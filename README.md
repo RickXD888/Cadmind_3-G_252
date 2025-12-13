@@ -115,6 +115,21 @@ Este proyecto utiliza el siguiente recurso gráfico liberado bajo el dominio pú
    * *Licencia:* CC0 (Dominio Público)
    * *Fuente:* [OpenGameArt.org](https://opengameart.org/content/fantasy-card-dark-cosmic)
 
+### 🔊 Audio y Música
+La banda sonora y los efectos de sonido integrados en el juego provienen de las siguientes fuentes libres de regalías y bancos de sonidos:
+
+* **Calm Space Music** por **Clavier-Music**
+  * *Licencia:* Pixabay Content License (Uso gratuito).
+  * *Fuente:* [Perfil de Clavier-Music en Pixabay](https://pixabay.com/users/clavier-music-16027823/)
+
+* **Interstellar Drip II** por **lazarosv**
+  * *Licencia:* Pixabay Content License (Uso gratuito).
+  * *Fuente:* [Perfil de lazarosv en Pixabay](https://pixabay.com/users/lazarosv-24603977/)
+
+* **Efectos de Sonido (SFX)**
+  * *Descripción:* Colección de efectos de sonido puntuales para interacciones.
+  * *Fuente:* [MyInstants](https://www.myinstants.com/es/index/mx/)
+
 ---
 
 ### 💡 Recursos Recomendados
